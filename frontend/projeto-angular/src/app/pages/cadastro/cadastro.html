@@ -1,0 +1,30 @@
+<section class="cartao estreito">
+  <h2>Criar conta</h2>
+
+  <form #formulario="ngForm" (ngSubmit)="cadastrar()">
+    <label>
+      Nome
+      <input type="text" name="nome" [(ngModel)]="nome" required maxlength="120" />
+    </label>
+
+    <label>
+      E-mail
+      <input type="email" name="email" [(ngModel)]="email" required email />
+    </label>
+
+    <label>
+      Senha (mínimo 8 caracteres)
+      <input type="password" name="senha" [(ngModel)]="senha" required minlength="8" maxlength="72" />
+    </label>
+
+    @if (erro()) {
+      <p class="mensagem erro">{{ erro() }}</p>
+    }
+
+    <button type="submit" [disabled]="formulario.invalid || carregando()">
+      {{ carregando() ? 'Criando conta...' : 'Criar conta' }}
+    </button>
+  </form>
+
+  <p>Já tem conta? <a routerLink="/login">Entrar</a></p>
+</section>

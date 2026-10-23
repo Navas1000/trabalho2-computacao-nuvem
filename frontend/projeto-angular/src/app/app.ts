@@ -1,12 +1,21 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App {
-  protected readonly title = signal('projeto-angular');
+  protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  sair(): void {
+    this.auth.sair().subscribe({
+      complete: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login']),
+    });
+  }
 }
