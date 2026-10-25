@@ -192,11 +192,19 @@ else
   aviso "backend nao respondeu. Veja: journalctl -u compnuvem-backend -n 80 --no-pager"
 fi
 
-# ---------------------------------------------------------------- teste de fumaca
-if [[ -x "$INFRA/tests/teste_executor.sh" || -f "$INFRA/tests/teste_executor.sh" ]] && [[ "${SKIP_SELFTEST:-0}" != "1" ]]; then
-  etapa "Executando teste de fumaca do executor (namespaces + cgroups)"
-  EXECUTOR_DIR="$APP_HOME/executor" bash "$INFRA/tests/teste_executor.sh" \
-    || aviso "teste de fumaca do executor reportou falhas (veja acima)"
+# ---------------------------------------------------------------- testes automaticos
+if [[ "${SKIP_SELFTEST:-0}" != "1" ]]; then
+  if [[ -f "$INFRA/tests/teste_executor.sh" ]]; then
+    etapa "Executando teste de namespaces e cgroups v2"
+    EXECUTOR_DIR="$APP_HOME/executor" bash "$INFRA/tests/teste_executor.sh" \
+      || aviso "teste do executor reportou falhas"
+  fi
+
+  if [[ -f "$INFRA/tests/teste_api.sh" ]]; then
+    etapa "Executando teste de integracao ponta a ponta (API REST -> Runner -> Linux)"
+    bash "$INFRA/tests/teste_api.sh" http://127.0.0.1 \
+      || aviso "teste da API reportou falhas"
+  fi
 fi
 
 etapa "Provisionamento concluido"
