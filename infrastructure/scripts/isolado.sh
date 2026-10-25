@@ -13,7 +13,8 @@ origem="$(dir_execucao "$exec_id")/script.sh"
 # UTS namespace: hostname proprio.
 hostname "amb-$amb"
 
-# Mount namespace: /tmp privado em tmpfs (a memoria do tmpfs conta no limite do cgroup).
+# Mount namespace: /sys e /tmp privados (refletem os namespaces net e cgroup criados).
+mount -t sysfs -o nosuid,noexec,nodev sysfs /sys 2>/dev/null || true
 mount -t tmpfs -o "size=${TMP_TAMANHO_MB}m,mode=1777,nosuid,nodev" tmpfs /tmp
 
 # Usuario sem privilegios que executara o script.

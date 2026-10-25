@@ -8,7 +8,13 @@
 set -uo pipefail
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXEC_BIN="${EXECUTOR_DIR:-$SELF_DIR/../scripts}"
+if [[ -n "${EXECUTOR_DIR:-}" ]]; then
+  EXEC_BIN="$EXECUTOR_DIR"
+elif [[ -d /opt/compnuvem/executor ]]; then
+  EXEC_BIN=/opt/compnuvem/executor
+else
+  EXEC_BIN="$SELF_DIR/../scripts"
+fi
 STATE_DIR="${STATE_DIR:-/var/lib/compnuvem/exec}"
 CGROUP_ROOT="${CGROUP_ROOT:-/sys/fs/cgroup/compnuvem}"
 IO_ARQ=/var/tmp/compnuvem-io-teste.bin
@@ -175,13 +181,14 @@ verifica "recursos liberados (cgroup removido)"  test ! -d "$(cg 9005)"
 secao "8. Execucoes simultaneas em ambientes diferentes"
 "$EXEC_BIN/criar_ambiente.sh" 9005 500 64 2097152 >/dev/null 2>&1
 "$EXEC_BIN/criar_ambiente.sh" 9006 500 64 2097152 >/dev/null 2>&1
-echo 'echo A; sleep 3; echo fim-A' | "$EXEC_BIN/executar.sh" 9005 9005 >/dev/null
-echo 'echo B; sleep 3; echo fim-B' | "$EXEC_BIN/executar.sh" 9006 9006 >/dev/null
+echo 'echo A; sleep 3; echo fim-A' | "$EXEC_BIN/executar.sh" 9007 9005 >/dev/null
+echo 'echo B; sleep 3; echo fim-B' | "$EXEC_BIN/executar.sh" 9008 9006 >/dev/null
 sleep 1
-verifica "ambas EM_EXECUCAO ao mesmo tempo" bash -c "'$EXEC_BIN/status.sh' 9005 | grep -q EM_EXECUCAO && '$EXEC_BIN/status.sh' 9006 | grep -q EM_EXECUCAO"
-aguardar_fim 9005 15; aguardar_fim 9006 15
-verifica "saidas independentes (A e B)" bash -c "grep -q fim-A '$(dir 9005)/saida.log' && grep -q fim-B '$(dir 9006)/saida.log' && ! grep -q fim-B '$(dir 9005)/saida.log'"
+verifica "ambas EM_EXECUCAO ao mesmo tempo" bash -c "'$EXEC_BIN/status.sh' 9007 | grep -q EM_EXECUCAO && '$EXEC_BIN/status.sh' 9008 | grep -q EM_EXECUCAO"
+aguardar_fim 9007 15; aguardar_fim 9008 15
+verifica "saidas independentes (A e B)" bash -c "grep -q fim-A '$(dir 9007)/saida.log' && grep -q fim-B '$(dir 9008)/saida.log' && ! grep -q fim-B '$(dir 9007)/saida.log'"
 "$EXEC_BIN/remover.sh" 9005 >/dev/null; "$EXEC_BIN/remover.sh" 9006 >/dev/null
+rm -rf "$(dir 9007)" "$(dir 9008)"
 
 # ------------------------------------------------------------------ resumo
 printf '\n=== Resultado: %d OK, %d falhas, %d puladas ===\n' "$PASS" "$FAIL" "$SKIP"
