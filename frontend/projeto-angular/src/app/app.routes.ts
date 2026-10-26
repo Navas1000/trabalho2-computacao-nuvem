@@ -3,11 +3,13 @@ import { authGuard } from './guards/auth.guard';
 import { Login } from './pages/login/login';
 import { Cadastro } from './pages/cadastro/cadastro';
 import { Ambientes } from './pages/ambientes/ambientes';
+import { NovoAmbiente } from './pages/novo-ambiente/novo-ambiente';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'cadastro', component: Cadastro },
   { path: 'ambientes', component: Ambientes, canActivate: [authGuard] },
+  { path: 'ambientes/novo', component: NovoAmbiente, canActivate: [authGuard] },
   { path: '', pathMatch: 'full', redirectTo: 'ambientes' },
   { path: '**', redirectTo: 'ambientes' },
 ];

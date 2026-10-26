@@ -218,3 +218,15 @@ th {
     opacity: 0.55;
   }
 }
+
+.voltar {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.dica {
+  font-size: 0.8rem;
+  color: var(--cor-suave);
+}
