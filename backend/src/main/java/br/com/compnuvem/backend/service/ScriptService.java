@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.ByteBuffer;
 import java.nio.charset.*;
 import java.util.List;
@@ -48,6 +49,7 @@ public class ScriptService {
 
     @Transactional
     public Map<String, Object> criar(ScriptRequest dados) {
+        validarConteudo(dados.conteudo());
         Script script = new Script();
         script.setUsuario(usuarios.getReferenceById(usuarioAtual.id()));
         script.setNome(dados.nome());
@@ -57,10 +59,20 @@ public class ScriptService {
 
     @Transactional
     public Map<String, Object> atualizar(long id, ScriptRequest dados) {
+        validarConteudo(dados.conteudo());
         Script script = buscarEntidade(id);
         script.setNome(dados.nome());
         script.setConteudo(dados.conteudo());
         return Respostas.script(scripts.saveAndFlush(script), true);
+    }
+
+    private void validarConteudo(String conteudo) {
+        if (conteudo == null || conteudo.isBlank() || conteudo.indexOf(0) >= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Envie um script de texto nao vazio");
+        }
+        if (conteudo.getBytes(StandardCharsets.UTF_8).length > 256 * 1024) {
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "Script excede 256 KiB em UTF-8");
+        }
     }
 
     @Transactional
@@ -75,7 +87,10 @@ public class ScriptService {
 
     @Transactional
     public Map<String, Object> upload(String nome, MultipartFile arquivo) throws IOException {
-        if (nome.isBlank() || nome.length() > 120 || arquivo.isEmpty() || arquivo.getSize() > 262144) {
+        if (arquivo.getSize() > 262144) {
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "Arquivo excede 256 KiB");
+        }
+        if (nome.isBlank() || nome.length() > 120 || arquivo.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome ou arquivo invalido");
         }
 

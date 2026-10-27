@@ -1,6 +1,8 @@
 package br.com.compnuvem.backend.config;
 
 import br.com.compnuvem.backend.security.TokenFilter;
+import br.com.compnuvem.backend.security.PayloadLimitFilter;
+import org.springframework.security.web.header.HeaderWriterFilter;
 import br.com.compnuvem.backend.service.AuthService;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.*;
@@ -27,6 +29,12 @@ public class SecurityConfig {
     public SecurityFilterChain runner(HttpSecurity http) throws Exception {
         return http.securityMatcher("/api/runner/**")
                 .cors(Customizer.withDefaults())
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                        .contentTypeOptions(Customizer.withDefaults())
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'self'")))
+                .addFilterAfter(new PayloadLimitFilter(), HeaderWriterFilter.class)
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
@@ -38,6 +46,12 @@ public class SecurityConfig {
     public SecurityFilterChain usuarios(HttpSecurity http, AuthService authService) throws Exception {
         // Nao usamos cookies, form login ou HTTP Basic: credenciais vao em header explicito.
         return http.cors(Customizer.withDefaults())
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                        .contentTypeOptions(Customizer.withDefaults())
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'self'")))
+                .addFilterAfter(new PayloadLimitFilter(), HeaderWriterFilter.class)
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

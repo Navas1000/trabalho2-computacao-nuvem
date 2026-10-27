@@ -3,6 +3,8 @@ package br.com.compnuvem.backend.controller;
 import br.com.compnuvem.backend.dto.*;
 import br.com.compnuvem.backend.service.AuthService;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import br.com.compnuvem.backend.security.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -11,9 +13,13 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService auth;
+    private final LoginRateLimiter rateLimiter;
+    private final ClientAddress clientAddress;
 
-    public AuthController(AuthService auth) {
+    public AuthController(AuthService auth, LoginRateLimiter rateLimiter, ClientAddress clientAddress) {
         this.auth = auth;
+        this.rateLimiter = rateLimiter;
+        this.clientAddress = clientAddress;
     }
 
     @PostMapping("/cadastro")
@@ -23,7 +29,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> entrar(@Valid @RequestBody LoginRequest dados) {
+    public ResponseEntity<Map<String, Object>> entrar(@Valid @RequestBody LoginRequest dados,
+                                                       HttpServletRequest request) {
+        rateLimiter.verificar(clientAddress.obter(request), dados.email());
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(auth.entrar(dados));
     }
 
