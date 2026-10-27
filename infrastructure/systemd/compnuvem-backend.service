@@ -1,0 +1,24 @@
+[Unit]
+Description=Compnuvem - Backend Spring Boot
+After=network.target mysql.service
+Requires=mysql.service
+
+[Service]
+Type=simple
+User=compnuvem
+Group=compnuvem
+WorkingDirectory=/opt/compnuvem/backend
+# DB_URL, DB_USER, DB_PASSWORD, RUNNER_TOKEN, SERVER_ADDRESS, FRONTEND_ORIGIN (gerados no provisionamento)
+EnvironmentFile=/etc/compnuvem/backend.env
+ExecStart=/usr/bin/java -Xmx512m -jar /opt/compnuvem/backend/app.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+# Hardening: o backend nao precisa de privilegios.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

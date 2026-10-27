@@ -1,0 +1,36 @@
+<div class="seletor">
+  <label>
+    Script armazenado
+    <select [ngModel]="scriptId()" (ngModelChange)="scriptId.set($event)" [ngModelOptions]="{ standalone: true }">
+      <option [ngValue]="null">{{ obrigatorio() ? 'Selecione um script' : 'Nenhum (só criar o ambiente)' }}</option>
+      @for (script of lista(); track script.id) {
+        <option [ngValue]="script.id">{{ script.nome }}</option>
+      }
+    </select>
+  </label>
+
+  <fieldset>
+    <legend>Ou envie um novo script</legend>
+    <div class="envio">
+      <input #campoArquivo type="file" accept=".sh,.txt,text/plain" (change)="escolherArquivo($event)" />
+      <input
+        type="text"
+        placeholder="Nome do script"
+        maxlength="120"
+        [(ngModel)]="nomeNovo"
+        [ngModelOptions]="{ standalone: true }"
+        (keydown.enter)="$event.preventDefault()"
+      />
+      <button type="button" class="secundario" [disabled]="enviando()" (click)="enviar(campoArquivo)">
+        {{ enviando() ? 'Enviando...' : 'Enviar script' }}
+      </button>
+    </div>
+  </fieldset>
+
+  @if (erro()) {
+    <p class="mensagem erro">{{ erro() }}</p>
+  }
+  @if (sucesso()) {
+    <p class="mensagem sucesso">{{ sucesso() }}</p>
+  }
+</div>

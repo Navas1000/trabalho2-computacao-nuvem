@@ -1,0 +1,58 @@
+:host {
+  display: grid;
+  gap: 16px;
+}
+
+h2,
+h3 {
+  margin: 0 0 12px;
+}
+
+.limites {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.limites div {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+}
+
+.limites span {
+  font-size: 0.8rem;
+  color: var(--cor-suave);
+}
+
+.rodape-execucao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.terminal {
+  margin: 12px 0 0;
+  padding: 14px;
+  height: 320px;
+  overflow: auto;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 6px;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.tabela-rolavel {
+  overflow-x: auto;
+}
+
+tr.selecionada {
+  background: #eff6ff;
+}

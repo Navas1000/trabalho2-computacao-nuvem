@@ -1,0 +1,25 @@
+<section class="cartao estreito">
+  <h2>Entrar</h2>
+
+  <form #formulario="ngForm" (ngSubmit)="entrar()">
+    <label>
+      E-mail
+      <input type="email" name="email" [(ngModel)]="email" required email />
+    </label>
+
+    <label>
+      Senha
+      <input type="password" name="senha" [(ngModel)]="senha" required />
+    </label>
+
+    @if (erro()) {
+      <p class="mensagem erro">{{ erro() }}</p>
+    }
+
+    <button type="submit" [disabled]="formulario.invalid || carregando()">
+      {{ carregando() ? 'Entrando...' : 'Entrar' }}
+    </button>
+  </form>
+
+  <p>Ainda não tem conta? <a routerLink="/cadastro">Cadastre-se</a></p>
+</section>

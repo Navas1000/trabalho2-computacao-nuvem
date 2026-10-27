@@ -1,0 +1,21 @@
+[Unit]
+Description=Compnuvem - Runner (executor Linux: namespaces + cgroups v2)
+After=network.target compnuvem-backend.service
+Wants=compnuvem-backend.service
+
+[Service]
+Type=simple
+# Precisa ser root para criar cgroups e namespaces. Nao expoe porta alguma:
+# apenas CONSULTA o backend em 127.0.0.1 autenticado por token.
+User=root
+EnvironmentFile=/etc/compnuvem/runner.env
+RuntimeDirectory=compnuvem-runner
+RuntimeDirectoryMode=0700
+ExecStart=/opt/compnuvem/executor/runner.sh
+Restart=always
+RestartSec=3
+# Reiniciar/parar o runner NAO deve matar as execucoes em andamento (supervisores desacoplados).
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

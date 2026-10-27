@@ -1,0 +1,10 @@
+<header class="cabecalho">
+  <h1>Ambientes Isolados</h1>
+  @if (auth.logado()) {
+    <button type="button" class="secundario" (click)="sair()">Sair</button>
+  }
+</header>
+
+<main>
+  <router-outlet />
+</main>
