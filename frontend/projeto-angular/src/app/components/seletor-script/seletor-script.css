@@ -1,0 +1,29 @@
+.seletor {
+  display: grid;
+  gap: 12px;
+}
+
+fieldset {
+  border: 1px dashed var(--cor-borda);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 0;
+}
+
+legend {
+  font-size: 0.9rem;
+  color: var(--cor-suave);
+  padding: 0 4px;
+}
+
+.envio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.envio input[type='text'] {
+  flex: 1;
+  min-width: 160px;
+}

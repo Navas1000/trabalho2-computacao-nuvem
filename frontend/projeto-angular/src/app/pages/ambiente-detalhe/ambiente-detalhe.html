@@ -1,0 +1,119 @@
+<a routerLink="/ambientes" class="voltar">← Voltar para ambientes</a>
+
+@if (erro()) {
+  <p class="mensagem erro">{{ erro() }}</p>
+}
+
+@if (ambiente(); as ambiente) {
+  <section class="cartao">
+    <h2>{{ ambiente.nome }}</h2>
+    <div class="limites">
+      <div>
+        <span>CPU</span>
+        <strong>{{ descreverCpu(ambiente.cpu_millicores) }}</strong>
+      </div>
+      <div>
+        <span>Memória</span>
+        <strong>{{ ambiente.memoria_mb }} MB</strong>
+      </div>
+      <div>
+        <span>Limite de I/O</span>
+        <strong>{{ ioParaMbPorSegundo(ambiente.io_bytes_segundo) }} MB/s</strong>
+      </div>
+      <div>
+        <span>Criado em</span>
+        <strong>{{ dataDoBackend(ambiente.criado_em) | date: 'dd/MM/yyyy HH:mm' }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="cartao">
+    <h3>Executar script</h3>
+    <app-seletor-script [(scriptId)]="scriptId" [obrigatorio]="true" />
+    <div class="rodape-execucao">
+      <button type="button" [disabled]="scriptId() === null || temAtiva() || iniciando()" (click)="executar()">
+        {{ iniciando() ? 'Iniciando...' : 'Executar script no ambiente' }}
+      </button>
+      @if (temAtiva()) {
+        <small class="dica">Este ambiente já tem uma execução em andamento.</small>
+      }
+    </div>
+  </section>
+
+  <section class="cartao">
+    @if (selecionada(); as execucao) {
+      <div class="titulo-secao">
+        <div>
+          <h3>Execução #{{ execucao.id }} · {{ nomeDoScript(execucao.script_id) }}</h3>
+          <span class="status" [class]="statusDaExecucao(execucao).classe">{{ statusDaExecucao(execucao).rotulo }}</span>
+          <small class="status-data">
+            Atualizado em {{ dataDoBackend(execucao.atualizado_em) | date: 'dd/MM/yyyy HH:mm:ss' }}
+          </small>
+        </div>
+        <button
+          type="button"
+          class="perigo"
+          [disabled]="execucao.status !== 'PENDENTE' && execucao.status !== 'EM_EXECUCAO'"
+          (click)="parar(execucao)"
+        >
+          Parar execução
+        </button>
+      </div>
+      <!-- A saída é mostrada com {{ }}: o Angular escapa o texto, então nada da saída é executado no navegador. -->
+      <pre #terminal class="terminal">{{ saida() || 'Aguardando saída...' }}</pre>
+    } @else {
+      <h3>Execução</h3>
+      <p>Nenhuma execução neste ambiente ainda.</p>
+    }
+  </section>
+
+  <section class="cartao">
+    <h3>Histórico de execuções</h3>
+    @if (execucoes().length === 0) {
+      <p>Nenhuma execução registrada.</p>
+    } @else {
+      <div class="tabela-rolavel">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Script</th>
+              <th>Status</th>
+              <th>Início</th>
+              <th>Última atualização</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (execucao of execucoes(); track execucao.id) {
+              <tr [class.selecionada]="execucao.id === selecionadaId()">
+                <td>{{ execucao.id }}</td>
+                <td>{{ nomeDoScript(execucao.script_id) }}</td>
+                <td>
+                  <span class="status" [class]="statusDaExecucao(execucao).classe">{{ statusDaExecucao(execucao).rotulo }}</span>
+                </td>
+                <td>{{ dataDoBackend(execucao.criado_em) | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td>{{ dataDoBackend(execucao.atualizado_em) | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td>
+                  <div class="acoes">
+                    <button type="button" class="secundario" (click)="selecionar(execucao)">Ver saída</button>
+                    @if (estaAtiva(execucao)) {
+                      <button
+                        type="button"
+                        class="perigo"
+                        [disabled]="execucao.status === 'PARADA_SOLICITADA'"
+                        (click)="parar(execucao)"
+                      >
+                        Parar
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}

@@ -1,0 +1,56 @@
+<section class="cartao">
+  <div class="titulo-secao">
+    <h2>Ambientes</h2>
+    <a class="botao" routerLink="/ambientes/novo">Novo ambiente</a>
+  </div>
+
+  @if (erro()) {
+    <p class="mensagem erro">{{ erro() }}</p>
+  }
+  @if (sucesso()) {
+    <p class="mensagem sucesso">{{ sucesso() }}</p>
+  }
+
+  @if (carregando()) {
+    <p>Carregando...</p>
+  } @else if (lista().length === 0) {
+    <p>Nenhum ambiente criado ainda.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>CPU</th>
+          <th>Memória</th>
+          <th>Limite de I/O</th>
+          <th>Criado em</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (linha of lista(); track linha.ambiente.id) {
+          <tr>
+            <td>{{ linha.ambiente.nome }}</td>
+            <td>{{ descreverCpu(linha.ambiente.cpu_millicores) }}</td>
+            <td>{{ linha.ambiente.memoria_mb }} MB</td>
+            <td>{{ ioParaMbPorSegundo(linha.ambiente.io_bytes_segundo) }} MB/s</td>
+            <td>{{ linha.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span class="status" [class]="linha.status.classe">{{ linha.status.rotulo }}</span>
+              @if (linha.status.atualizadoEm) {
+                <small class="status-data">{{ linha.status.atualizadoEm | date: 'dd/MM/yyyy HH:mm:ss' }}</small>
+              }
+            </td>
+            <td>
+              <div class="acoes">
+                <a [routerLink]="['/ambientes', linha.ambiente.id]">Abrir</a>
+                <button type="button" class="perigo" (click)="remover(linha.ambiente)">Remover</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>
