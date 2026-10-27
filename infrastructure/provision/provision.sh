@@ -38,7 +38,8 @@ etapa "Instalando pacotes (Git, Java 17, MySQL, Nginx e utilitarios)"
 apt-get update -y
 apt-get install -y --no-install-recommends \
   ca-certificates curl git jq openssl xz-utils util-linux \
-  openjdk-17-jdk-headless mysql-server nginx
+  openjdk-17-jdk-headless mysql-server nginx \
+  python3 python3-networkx python3-matplotlib
 
 # ---------------------------------------------------------------- Node.js
 etapa "Instalando Node.js $NODE_VERSION"

@@ -31,9 +31,44 @@ for oculto in "$(dirname "$STATE_DIR")" /etc/compnuvem /opt/compnuvem; do
 done
 
 cd /tmp
-# Se o script comeca com shebang (#!), respeita o interpretador; senao usa bash.
+# Se o script comeca com shebang (#!), respeita o interpretador.
 if [[ "$(head -c2 /tmp/script.sh)" == "#!" ]]; then
   comando=(/tmp/script.sh)
+elif [[ "$(head -c1 /tmp/script.sh)" == "{" ]] && grep -q '"cells"' /tmp/script.sh 2>/dev/null; then
+  # Notebook Jupyter (.ipynb): converte/extrai celulas de codigo para Python puro
+  echo "[executor] Detectado formato Jupyter Notebook (.ipynb). Extraindo celulas de codigo Python..."
+  if python3 -c '
+import json, sys
+try:
+    with open("/tmp/script.sh", "r", encoding="utf-8") as f:
+        nb = json.load(f)
+    codes = ["import os\nos.environ[\"MPLBACKEND\"] = \"Agg\"\n"]
+    for c in nb.get("cells", []):
+        if c.get("cell_type") == "code":
+            src = "".join(c.get("source", []))
+            cleaned = []
+            for line in src.splitlines():
+                if line.strip().startswith(("%", "!")):
+                    cleaned.append("# [jupyter-magic] " + line)
+                else:
+                    cleaned.append(line)
+            codes.append("\n".join(cleaned))
+    with open("/tmp/script_notebook.py", "w", encoding="utf-8") as out:
+        out.write("\n\n".join(codes) + "\n")
+except Exception as e:
+    sys.stderr.write(f"[executor] Falha ao extrair celulas do notebook: {e}\n")
+    sys.exit(1)
+'; then
+    chown "$uid:$gid" /tmp/script_notebook.py
+    chmod 0755 /tmp/script_notebook.py
+    comando=(/usr/bin/python3 /tmp/script_notebook.py)
+  else
+    comando=(/bin/bash /tmp/script.sh)
+  fi
+elif head -n 20 /tmp/script.sh | grep -Eq '^(import |from [a-zA-Z0-9_]+ import |def [a-zA-Z0-9_]+\()'; then
+  # Codigo Python sem shebang
+  echo "[executor] Detectado codigo Python sem shebang. Executando com /usr/bin/python3..."
+  comando=(/usr/bin/python3 /tmp/script.sh)
 else
   comando=(/bin/bash /tmp/script.sh)
 fi

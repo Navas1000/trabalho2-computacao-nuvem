@@ -44,9 +44,15 @@ matar_cgroup "$cg" || true
 wait "$tee_out" "$tee_err" 2>/dev/null || true
 rm -f "$dir/out.fifo" "$dir/err.fifo"
 
-# OOM: o kernel mata sem avisar o job; registramos para o usuario entender o codigo 137.
+# Diagnosticos amigaveis de encerramento gravados no log de erro e saida.
 if grep -Eq '^oom_kill [1-9]' "$cg/memory.events" 2>/dev/null; then
   msg="[executor] processo encerrado pelo kernel: limite de memoria do ambiente excedido"
+  echo "$msg" | tee -a "$dir/stderr.log" >> "$dir/saida.log"
+elif (( rc == 2 )); then
+  msg="[executor] Erro de sintaxe (codigo 2): o interpretador encontrou erros de sintaxe ao processar o script."
+  echo "$msg" | tee -a "$dir/stderr.log" >> "$dir/saida.log"
+elif (( rc == 127 )); then
+  msg="[executor] Comando nao encontrado (codigo 127): o script tentou invocar um comando ou programa inexistente."
   echo "$msg" | tee -a "$dir/stderr.log" >> "$dir/saida.log"
 fi
 

@@ -181,15 +181,9 @@ reconciliar() {
 }
 
 limpar_antigos() {
-  # Remove logs de execucoes finalizadas ha mais de RETENCAO_DIAS dias e cgroups sem uso.
+  # Remove logs de execucoes finalizadas ha mais de RETENCAO_DIAS dias.
   find "$STATE_DIR" -mindepth 1 -maxdepth 1 -type d -mtime +"$RETENCAO_DIAS" \
        ! -exec test -e '{}/ativo' \; -exec rm -rf {} + 2>/dev/null
-  local cg amb
-  for cg in "$CGROUP_ROOT"/amb-*; do
-    [[ -d "$cg" && ! -s "$cg/cgroup.procs" ]] || continue
-    amb=${cg##*/amb-}
-    "$EXEC_BIN/remover.sh" "$amb" >/dev/null 2>&1
-  done
 }
 
 parar_loop=0
