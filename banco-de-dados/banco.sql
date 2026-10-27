@@ -1,3 +1,6 @@
+-- Banco padrao da infraestrutura: compnuvem. A API permite outra conexao por DB_URL.
+-- DB_URL nao renomeia o schema deste arquivo: para outro nome, ajustar CREATE DATABASE/USE.
+-- Dados de demonstracao separados em banco-de-dados/dados_teste.sql (importacao opcional).
 -- Estrutura completa do projeto. MySQL Server 8.0.16+.
 -- Executar em um banco novo. Nao apaga dados nem atualiza estruturas antigas.
 -- Cadastros de usuarios e hashes de senha sao gerados pela API.
