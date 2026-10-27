@@ -106,6 +106,12 @@ if [[ -f "$SCHEMA" ]]; then
 else
   aviso "esquema SQL nao encontrado em $SCHEMA; banco nao criado"
 fi
+
+DADOS_TESTE="$REPO_DIR/banco-de-dados/dados_teste.sql"
+if [[ -f "$DADOS_TESTE" ]]; then
+  mysql compnuvem < "$DADOS_TESTE" || aviso "falha ao aplicar dados_teste.sql"
+  echo "Dados de teste aplicados com sucesso: $DADOS_TESTE"
+fi
 # Usuario da aplicacao com o minimo de privilegios (a aplicacao nao altera o esquema).
 mysql <<SQL
 CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
